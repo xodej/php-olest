@@ -1,0 +1,30 @@
+{
+  "name": "xodej/php-olest",
+  "description": "Jedox OLAP data integrity tests",
+  "keywords": ["jedox", "olap", "test", "php"],
+  "homepage": "http://github.com/xodej/php-olest",
+  "type": "library",
+  "license": "MIT",
+  "authors": [
+    {
+      "name": "Johannes Mueller",
+      "email": "circus2@web.de",
+      "role": "Developer"
+    }
+  ],
+  "require": {
+    "php": ">=7.3.0",
+    "xodej/php-olapi": "dev-master"
+  },
+  "suggest": {
+  },
+  "autoload": {
+    "psr-4": {
+      "Xodej\\": "src/",
+      "Xodej\\Olest\\Test\\": "tests/"
+    }
+  },
+  "require-dev": {
+    "phpunit/phpunit": "8"
+  }
+}
