@@ -5,8 +5,7 @@ declare(strict_types=1);
 namespace Xodej\Olest;
 
 /**
- * Class BoolParam
- * @package Xodej\Olest
+ * Class BoolParam.
  */
 class BoolParam implements TestParamInterface
 {

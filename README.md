@@ -30,11 +30,11 @@ namespace Xodej\Olest\Test;
 
 include_once __DIR__ . '/../vendor/autoload.php';
 
-use Xodej\Olest\OlestTestCase;
-use Xodej\Olest\TestParamCubeNum;
+use Xodej\Olest\OlapTestCase;
+use Xodej\Olest\CubeNumParam;
 use Xodej\Olapi\Connection;
 
-class AdminTest extends OlestTestCase
+class AdminTest extends OlapTestCase
 {
     // define test
     public function testAdminIsAdmin(): void
@@ -44,9 +44,9 @@ class AdminTest extends OlestTestCase
         $cube = $connection->getCube('System/#_USER_GROUP');
 
         // test that admin user is assigned to admin group
-        $this->olestAssertEquals(
+        $this->assertOlapEquals(
             1,
-            new TestParamCubeNum($cube, ['admin', 'admin']),
+            new CubeNumParam($cube, ['admin', 'admin']),
             'admin user is not assigned to admin group'
         );
     }

@@ -27,7 +27,7 @@ class Example2Test extends OlapTestCase
         $connection = ConnectionSingleton::getConnection('test_conn', 'http://127.0.0.1:7777', 'admin', 'admin');
         $cube = $connection->getCube('System/#_USER_GROUP');
 
-        $this->olestAssertEquals(
+        $this->assertOlapEquals(
             1,
             new CubeNumParam($cube, ['admin', 'admin']),
             'admin user is not assigned to admin group {!1} / {!2}'
@@ -43,7 +43,7 @@ class Example2Test extends OlapTestCase
         $connection = ConnectionSingleton::getConnection('test_conn', 'http://127.0.0.1:7777', 'admin', 'admin');
         $cube = $connection->getCube('System/#_USER_GROUP');
 
-        $this->olestAssertNotEquals(
+        $this->assertOlapNotEquals(
             1,
             new CubeNumParam($cube, ['admin', 'designer']),
             'admin user is not assigned to admin group'

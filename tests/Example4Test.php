@@ -29,10 +29,10 @@ class Example4Test extends OlapTestCase
 
         self::$numberFormatDecimals = 5;
 
-        $this->olestAssertEqualsWithDelta(
+        $this->assertOlapEqualsWithDelta(
             -28124787.77,
             new CubeNumParam($cube, ['Actual', '2016', 'Jan', '10 Best Bike Seller AG', 'Taxes on income']),
-            'delta is {!3}',
+            'delta is %3$$',
             0.001
         );
     }

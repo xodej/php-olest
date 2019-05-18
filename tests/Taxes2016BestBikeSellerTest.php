@@ -37,11 +37,11 @@ class Taxes2016BestBikeSellerTest extends OlapTestCase
         // testing all 12 months in one test
         // making a single HTTP call to OLAP
         foreach ($tests as $variable_coordinate => $expected) {
-            $this->olestAssertEqualsWithDelta(
+            $this->assertOlapAlmostEquals(
                 $expected,
                 new CubeNumParam($cube, ['Actual', '2016', $variable_coordinate, '10 Best Bike Seller AG', 'Taxes on income']), // THIS IS RECOMMENDED -> 1 HTTP request
-                // $cube->getValue(['Actual', '2016', $variable_coordinate, '10 Best Bike Seller AG', 'Taxes on income']), // THIS IS SLOW -> 12 HTTP requests
-                'delta is {!3}',
+                // (float) $cube->getValue(['Actual', '2016', $variable_coordinate, '10 Best Bike Seller AG', 'Taxes on income']), // THIS IS SLOW -> 12 HTTP requests
+                'delta is %3$$',
                 0.01
             );
         }

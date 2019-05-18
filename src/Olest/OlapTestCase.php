@@ -4,20 +4,24 @@ declare(strict_types=1);
 
 namespace Xodej\Olest;
 
+use PHPUnit\Framework\ExpectationFailedException;
 use PHPUnit\Framework\TestCase;
+use Xodej\Olapi\Cube;
 
 /**
  * Class OlapTestCase.
  */
 abstract class OlapTestCase extends TestCase
 {
-    // public static $chunkSize = 1000; // not used --> palo query chunk size
-
     protected const TYPE_EQUALS = 1;
     protected const TYPE_TRUE = 2;
-    protected const TYPE_FALSE = 3;
-    protected const TYPE_NOT_EQUALS = 4;
-    protected const TYPE_EQUALS_WITH_DELTA = 5;
+    protected const TYPE_FALSE = 4;
+    protected const TYPE_NOT_EQUALS = 8;
+    protected const TYPE_EQUALS_WITH_DELTA = 16;
+    protected const TYPE_LESS_THAN = 32;
+    protected const TYPE_LESS_THAN_OR_EQUAL = 64;
+    protected const TYPE_GREATER_THAN = 128;
+    protected const TYPE_GREATER_THAN_OR_EQUAL = 256;
 
     /** @var null|int */
     public static $blockPrintSize = 5;
@@ -25,17 +29,17 @@ abstract class OlapTestCase extends TestCase
     /** @var int */
     public static $numberFormatDecimals = 2;
 
-    /** @var \ArrayObject */
-    protected $testQueue;
+    /** @var int */
+    protected static $counter = 0;
 
-    /** @var AbstractCubeParam[] */
-    protected $cubeCoordQueue;
+    /** @var TestScenario[] */
+    protected $testQueue;
 
     /** @var string[] */
     protected $failures;
 
     /**
-     * OlestTestCase constructor.
+     * OlapTestCase constructor.
      *
      * @param null   $name
      * @param array  $data
@@ -45,8 +49,9 @@ abstract class OlapTestCase extends TestCase
     {
         parent::__construct($name, $data, $dataName);
 
+        self::$counter = 0;
+
         $this->testQueue = new \ArrayObject();
-        $this->cubeCoordQueue = new \ArrayObject();
         $this->failures = new \ArrayObject();
     }
 
@@ -69,25 +74,9 @@ abstract class OlapTestCase extends TestCase
      *
      * @throws \Exception
      */
-    public function olestAssertEquals($expected, $actual, string $message = ''): void
+    public function assertOlapEquals($expected, $actual, string $message = ''): void
     {
-        if (\is_scalar($expected)) {
-            $expected = new AnyParam($expected);
-        }
-
-        if (\is_scalar($actual)) {
-            $actual = new AnyParam($actual);
-        }
-
-        if (!($expected instanceof TestParamInterface) || !($actual instanceof TestParamInterface)) {
-            throw new \Exception('unsupported type '.gettype($expected).' or '.gettype($actual).' used in olestAssertEquals()');
-        }
-
-        // add
-        $this->_cubeQueueing($expected);
-        $this->_cubeQueueing($actual);
-
-        $this->testQueue[self::TYPE_EQUALS][] = [$expected, $actual, $message];
+        $this->testQueue[] = TestScenario::getTestScenarioActualAndExpected(self::TYPE_EQUALS, $expected, $actual, $message);
     }
 
     /**
@@ -98,144 +87,102 @@ abstract class OlapTestCase extends TestCase
      *
      * @throws \Exception
      */
-    public function olestAssertEqualsWithDelta($expected, $actual, string $message = '', float $delta = 0.001): void
+    public function assertOlapEqualsWithDelta($expected, $actual, string $message = '', float $delta = 0.001): void
     {
-        if (\is_scalar($expected)) {
-            $expected = new AnyParam($expected);
-        }
-
-        if (\is_scalar($actual)) {
-            $actual = new AnyParam($actual);
-        }
-
-        if (!($expected instanceof TestParamInterface) || !($actual instanceof TestParamInterface)) {
-            throw new \Exception('unsupported type '.gettype($expected).' or '.gettype($actual).' used in olestAssertEqualsWithDelta()');
-        }
-
-        // add
-        $this->_cubeQueueing($expected);
-        $this->_cubeQueueing($actual);
-
-        $this->testQueue[self::TYPE_EQUALS_WITH_DELTA][] = [$expected, $actual, $message, $delta];
+        $this->testQueue[] = TestScenario::getTestScenarioActualAndExpected(self::TYPE_EQUALS_WITH_DELTA, $expected, $actual, $message, $delta);
     }
 
     /**
-     * @param mixed  $expected
-     * @param mixed  $actual
-     * @param string $message
+     * @param bool|float|int|string|TestParamInterface $expected
+     * @param bool|float|int|string|TestParamInterface $actual
+     * @param string                                   $message
+     * @param float                                    $delta
      *
      * @throws \Exception
      */
-    public function olestAssertNotEquals($expected, $actual, string $message = ''): void
+    public function assertOlapAlmostEquals($expected, $actual, string $message = '', float $delta = 0.001): void
     {
-        if (\is_scalar($expected)) {
-            $expected = new AnyParam($expected);
-        }
-
-        if (\is_scalar($actual)) {
-            $actual = new AnyParam($actual);
-        }
-
-        if (!($expected instanceof TestParamInterface) || !($actual instanceof TestParamInterface)) {
-            throw new \Exception('unsupported type '.gettype($expected).' or '.gettype($actual).' used in olestAssertNotEquals()');
-        }
-
-        // add
-        $this->_cubeQueueing($expected);
-        $this->_cubeQueueing($actual);
-
-        $this->testQueue[self::TYPE_NOT_EQUALS][] = [$expected, $actual, $message];
+        $this->assertOlapEqualsWithDelta($expected, $actual, $message, $delta);
     }
 
     /**
-     * @param mixed  $actual
-     * @param string $message
-     *
-     * @throws \Exception
+     * @param bool|float|int|string|TestParamInterface $expected
+     * @param bool|float|int|string|TestParamInterface $actual
+     * @param string                                   $message
      */
-    public function olestAssertTrue($actual, string $message = ''): void
+    public function assertOlapGreaterThan($expected, $actual, string $message = ''): void
     {
-        if (\is_scalar($actual)) {
-            $actual = new AnyParam($actual);
-        }
-
-        if (!($actual instanceof TestParamInterface)) {
-            throw new \Exception('unsupported type '.gettype($actual).' used in olestAssertTrue()');
-        }
-
-        // add
-        $this->_cubeQueueing($actual);
-
-        $this->testQueue[self::TYPE_TRUE][] = [$actual, $message];
+        $this->testQueue[] = TestScenario::getTestScenarioActualAndExpected(self::TYPE_GREATER_THAN, $expected, $actual, $message);
     }
 
     /**
-     * @param mixed  $actual
-     * @param string $message
+     * @param bool|float|int|string|TestParamInterface $expected
+     * @param bool|float|int|string|TestParamInterface $actual
+     * @param string                                   $message
+     */
+    public function assertOlapGreaterThanOrEqual($expected, $actual, string $message = ''): void
+    {
+        $this->testQueue[] = TestScenario::getTestScenarioActualAndExpected(self::TYPE_GREATER_THAN_OR_EQUAL, $expected, $actual, $message);
+    }
+
+    /**
+     * @param bool|float|int|string|TestParamInterface $expected
+     * @param bool|float|int|string|TestParamInterface $actual
+     * @param string                                   $message
+     */
+    public function assertOlapLessThan($expected, $actual, string $message = ''): void
+    {
+        $this->testQueue[] = TestScenario::getTestScenarioActualAndExpected(self::TYPE_LESS_THAN, $expected, $actual, $message);
+    }
+
+    /**
+     * @param bool|float|int|string|TestParamInterface $expected
+     * @param bool|float|int|string|TestParamInterface $actual
+     * @param string                                   $message
+     */
+    public function assertOlapLessThanOrEqual($expected, $actual, string $message = ''): void
+    {
+        $this->testQueue[] = TestScenario::getTestScenarioActualAndExpected(self::TYPE_LESS_THAN_OR_EQUAL, $expected, $actual, $message);
+    }
+
+    /**
+     * @param bool|float|int|string|TestParamInterface $expected
+     * @param bool|float|int|string|TestParamInterface $actual
+     * @param string                                   $message
      *
      * @throws \Exception
      */
-    public function olestAssertFalse($actual, string $message = ''): void
+    public function assertOlapNotEquals($expected, $actual, string $message = ''): void
     {
-        if (\is_scalar($actual)) {
-            $actual = new AnyParam($actual);
-        }
+        $this->testQueue[] = TestScenario::getTestScenarioActualAndExpected(self::TYPE_NOT_EQUALS, $expected, $actual, $message);
+    }
 
-        if (!($actual instanceof TestParamInterface)) {
-            throw new \Exception('unsupported type '.gettype($actual).' used in olestAssertFalse()');
-        }
+    /**
+     * @param bool|float|int|string|TestParamInterface $actual
+     * @param string                                   $message
+     *
+     * @throws \Exception
+     */
+    public function assertOlapTrue($actual, string $message = ''): void
+    {
+        $this->testQueue[] = TestScenario::getTestScenarioActual(self::TYPE_TRUE, $actual, $message);
+    }
 
-        // add
-        $this->_cubeQueueing($actual);
-
-        $this->testQueue[self::TYPE_FALSE][] = [$actual, $message];
+    /**
+     * @param bool|float|int|string|TestParamInterface $actual
+     * @param string                                   $message
+     *
+     * @throws \Exception
+     */
+    public function assertOlapFalse($actual, string $message = ''): void
+    {
+        $this->testQueue[] = TestScenario::getTestScenarioActual(self::TYPE_FALSE, $actual, $message);
     }
 
     public function clearCache(): void
     {
         $this->failures = new \ArrayObject();
         $this->testQueue = new \ArrayObject();
-        $this->cubeCoordQueue = new \ArrayObject();
-    }
-
-    /**
-     * @param TestParamInterface $param
-     *
-     * @return bool
-     */
-    protected function _cubeQueueing(TestParamInterface $param): bool
-    {
-        // collect calls to cubes for fast cached calls
-        if ($param instanceof AbstractCubeParam) {
-            $this->cubeCoordQueue[] = $param;
-            // $this->_flushQueue();
-            return true;
-        }
-
-        return false;
-    }
-
-    protected function _addAddsAndSubsToQueue(): void
-    {
-        // add 1st level of subs and adds to cached-call-queue
-        $tmp = $this->cubeCoordQueue;
-        foreach ($tmp as $cube) {
-            // skip cube calls that return text
-            if (!($cube instanceof CubeNumParam)) {
-                continue;
-            }
-
-            if ($cube->hasAdd()) {
-                foreach ($cube->getAdd() as $nestedParamObj) {
-                    $this->_cubeQueueing($nestedParamObj);
-                }
-            }
-            if ($cube->hasSubtract()) {
-                foreach ($cube->getSubtract() as $nestedParamObj) {
-                    $this->_cubeQueueing($nestedParamObj);
-                }
-            }
-        }
     }
 
     /**
@@ -243,17 +190,76 @@ abstract class OlapTestCase extends TestCase
      */
     protected function _flushQueue(): void
     {
-        // add subs and adds to caching-queue
-        $this->_addAddsAndSubsToQueue();
-
-        // run for pre-fetching in cache
         $cubes = [];
-        foreach ($this->cubeCoordQueue as $preFetch) {
-            $cube = $preFetch->getCube();
-            $cubes[$cube->getOlapObjectId()] = $cube;
 
-            $cube->startCache(true);
-            $cube->getValueC($preFetch->getCoordinates());
+        foreach ($this->testQueue as $testScenario) {
+            // if expected requires an OLAP call
+            if ($testScenario->getExpected() instanceof AbstractCubeParam) {
+                /** @var Cube $cube */
+                $cube = $testScenario->getExpected()->getCube();
+                $cubes[$cube->getOlapObjectId()] = $cube;
+
+                $cube->startCache(true);
+
+                $cube->getValueC($testScenario->getExpected()->getCoordinates());
+
+                // CubeNumParam can potentially have add() and subtract()
+                if ($testScenario->getExpected() instanceof CubeNumParam) {
+                    // crawl through adds of expected
+                    foreach ($testScenario->getExpected()->getAdd() as $nestedParamObj) {
+                        /** @var Cube $addCube */
+                        $addCube = $nestedParamObj->getCube();
+                        $cubes[$addCube->getOlapObjectId()] = $addCube;
+
+                        $addCube->startCache(true);
+                        $addCube->getValueC($nestedParamObj->getCoordinates());
+                    }
+
+                    // crawl through subtracts of expected
+                    foreach ($testScenario->getExpected()->getSubtract() as $nestedParamObj) {
+                        /** @var Cube $subCube */
+                        $subCube = $nestedParamObj->getCube();
+                        $cubes[$subCube->getOlapObjectId()] = $subCube;
+
+                        $subCube->startCache(true);
+                        $subCube->getValueC($nestedParamObj->getCoordinates());
+                    }
+                } // instanceof CubeNumParam
+            } // expected
+
+            // if actual requires an OLAP call
+            if ($testScenario->getActual() instanceof AbstractCubeParam) {
+                /** @var Cube $cube */
+                $cube = $testScenario->getActual()->getCube();
+                $cubes[$cube->getOlapObjectId()] = $cube;
+
+                $cube->startCache(true);
+
+                $cube->getValueC($testScenario->getActual()->getCoordinates());
+
+                // CubeNumParam can potentially have add() and subtract()
+                if ($testScenario->getActual() instanceof CubeNumParam) {
+                    // crawl through adds of actual
+                    foreach ($testScenario->getActual()->getAdd() as $nestedParamObj) {
+                        /** @var Cube $addCube */
+                        $addCube = $nestedParamObj->getCube();
+                        $cubes[$addCube->getOlapObjectId()] = $addCube;
+
+                        $addCube->startCache(true);
+                        $addCube->getValueC($nestedParamObj->getCoordinates());
+                    }
+
+                    // crawl through subtracts of actual
+                    foreach ($testScenario->getActual()->getSubtract() as $nestedParamObj) {
+                        /** @var Cube $subCube */
+                        $subCube = $nestedParamObj->getCube();
+                        $cubes[$subCube->getOlapObjectId()] = $subCube;
+
+                        $subCube->startCache(true);
+                        $subCube->getValueC($nestedParamObj->getCoordinates());
+                    }
+                } // instanceof CubeNumParam
+            } // actual
         }
 
         foreach ($cubes as $cube) {
@@ -268,29 +274,25 @@ abstract class OlapTestCase extends TestCase
      */
     protected function runTests(): \ArrayObject
     {
+        // trigger the one single HTTP request to OLAP
         $this->_flushQueue();
 
         // run tests in queue
-        foreach ($this->testQueue as $type => $tests) {
-            switch ($type) {
+        foreach ($this->testQueue as $test) {
+            switch ($test->getScenarioType()) {
                 case self::TYPE_EQUALS:
-                    $this->runEquals($tests);
+                case self::TYPE_NOT_EQUALS:
+                case self::TYPE_EQUALS_WITH_DELTA:
+                case self::TYPE_LESS_THAN:
+                case self::TYPE_LESS_THAN_OR_EQUAL:
+                case self::TYPE_GREATER_THAN:
+                case self::TYPE_GREATER_THAN_OR_EQUAL:
+                    $this->runCompareTest($test);
 
                     break;
                 case self::TYPE_TRUE:
-                    $this->runTrue($tests);
-
-                    break;
                 case self::TYPE_FALSE:
-                    $this->runFalse($tests);
-
-                    break;
-                case self::TYPE_NOT_EQUALS:
-                    $this->runNotEquals($tests);
-
-                    break;
-                case self::TYPE_EQUALS_WITH_DELTA:
-                    $this->runEqualsWithDelta($tests);
+                    $this->runBoolTest($test);
 
                     break;
             }
@@ -303,68 +305,37 @@ abstract class OlapTestCase extends TestCase
     {
         // print out errors
         if (0 !== $this->failures->count()) {
-            throw new \PHPUnit\Framework\ExpectationFailedException(
+            throw new ExpectationFailedException(
                 $this->failures->count()." assertions failed:\n\t".\implode("\n\t", $this->failures->getArrayCopy())
             );
         }
     }
 
     /**
-     * @param array $tests
+     * @param TestScenario $test
      */
-    protected function runTrue(array $tests): void
+    protected function runBoolTest(TestScenario $test): void
     {
-        $i = 0;
-        foreach ($tests as $test) {
-            try {
-                self::assertTrue($test[0]->getValue());
-            } catch (\PHPUnit\Framework\ExpectationFailedException $e) {
-                ++$i;
-                $msg = $test[1];
-                // collect messages
-                if (null !== self::getBlockPrintSize() && 0 === $i % self::getBlockPrintSize()) {
-                    $msg .= PHP_EOL;
-                }
-                $this->failures[] = $msg;
+        try {
+            switch ($test->getScenarioType()) {
+                case self::TYPE_TRUE:
+                    self::assertTrue($test->getActual()->getValue());
+
+                    break;
+                case self::TYPE_FALSE:
+                    self::assertFalse($test->getActual()->getValue());
+
+                    break;
             }
-        }
-    }
-
-    /**
-     * @param array $tests
-     */
-    protected function runFalse(array $tests): void
-    {
-        $i = 0;
-        foreach ($tests as $test) {
-            try {
-                self::assertFalse($test[0]->getValue());
-            } catch (\PHPUnit\Framework\ExpectationFailedException $e) {
-                ++$i;
-                $msg = $test[1];
-                // collect messages
-                if (null !== self::getBlockPrintSize() && 0 === $i % self::getBlockPrintSize()) {
-                    $msg .= PHP_EOL;
-                }
-                $this->failures[] = $msg;
+        } catch (ExpectationFailedException $e) {
+            ++self::$counter;
+            $msg = $test->getMessage();
+            // collect messages
+            if (null !== self::getBlockPrintSize() && 0 === self::$counter % self::getBlockPrintSize()) {
+                $msg .= PHP_EOL;
             }
+            $this->failures[] = $msg;
         }
-    }
-
-    /**
-     * @param array $tests
-     */
-    protected function runNotEquals(array $tests): void
-    {
-        $this->runEquals($tests, true);
-    }
-
-    /**
-     * @param array $tests
-     */
-    protected function runEqualsWithDelta(array $tests): void
-    {
-        $this->runEquals($tests, false, true);
     }
 
     /**
@@ -372,7 +343,7 @@ abstract class OlapTestCase extends TestCase
      */
     protected static function getBlockPrintSize(): ?int
     {
-        if (null === self::$blockPrintSize || 0 === self::$blockPrintSize) {
+        if (null === self::$blockPrintSize || 0 === (int) self::$blockPrintSize) {
             return null;
         }
 
@@ -388,65 +359,80 @@ abstract class OlapTestCase extends TestCase
     }
 
     /**
-     * @param array     $tests
-     * @param null|bool $invertLogic
-     * @param null|bool $withDelta
+     * @param TestScenario $test
      */
-    protected function runEquals(array $tests, ?bool $invertLogic = null, ?bool $withDelta = null): void
+    protected function runCompareTest(TestScenario $test): void
     {
-        $invertLogic = $invertLogic ?? false;
-        $withDelta = $withDelta ?? false;
+        try {
+            switch ($test->getScenarioType()) {
+                case self::TYPE_NOT_EQUALS:
+                    self::assertNotEquals($test->getExpected()->getValue(), $test->getActual()->getValue());
 
-        $i = 0;
-        foreach ($tests as $test) {
-            try {
-                if ($invertLogic) {
-                    self::assertNotEquals($test[0]->getValue(), $test[1]->getValue());
-                } elseif ($withDelta) {
-                    self::assertEqualsWithDelta($test[0]->getValue(), $test[1]->getValue(), $test[3]);
-                } else {
-                    self::assertEquals($test[0]->getValue(), $test[1]->getValue());
-                }
-            } catch (\PHPUnit\Framework\ExpectationFailedException $e) {
-                ++$i;
+                    break;
+                case self::TYPE_EQUALS_WITH_DELTA:
+                    self::assertEqualsWithDelta($test->getExpected()->getValue(), $test->getActual()->getValue(), $test->getDelta());
 
-                $msg = (string) $test[2];
+                    break;
+                case self::TYPE_EQUALS:
+                    self::assertEquals($test->getExpected()->getValue(), $test->getActual()->getValue());
 
-                if (false !== \strpos($msg, '%')) {
-                    $expected_value = $test[0]->getValue();
-                    $actual_value = $test[1]->getValue();
+                    break;
+                case self::TYPE_LESS_THAN:
+                    self::assertLessThan($test->getExpected()->getValue(), $test->getActual()->getValue());
 
-                    // handle custom %1$$ pattern for number_format()
-                    $msg = (string) \preg_replace_callback('/(\%[1-3]\$\$)/', static function ($match) use ($expected_value, $actual_value): string {
-                        if (\is_numeric($expected_value) && '%1$$' === $match[1]) {
-                            return \number_format($expected_value, (int) self::getNumberFormatDecimals(), ',', '.');
-                        }
+                    break;
+                case self::TYPE_LESS_THAN_OR_EQUAL:
+                    self::assertLessThanOrEqual($test->getExpected()->getValue(), $test->getActual()->getValue());
 
-                        if (\is_numeric($actual_value) && '%2$$' === $match[1]) {
-                            return \number_format($actual_value, (int) self::getNumberFormatDecimals(), ',', '.');
-                        }
+                    break;
+                case self::TYPE_GREATER_THAN:
+                    self::assertGreaterThan($test->getExpected()->getValue(), $test->getActual()->getValue());
 
-                        if (\is_numeric($expected_value) && \is_numeric($actual_value) && '%3$$' === $match[1]) {
-                            return \number_format($actual_value - $expected_value, (int) self::getNumberFormatDecimals(), ',', '.');
-                        }
+                    break;
+                case self::TYPE_GREATER_THAN_OR_EQUAL:
+                    self::assertGreaterThanOrEqual($test->getExpected()->getValue(), $test->getActual()->getValue());
 
-                        return $match[1];
-                    }, $msg);
-
-                    // handle all other patterns
-                    if (\is_numeric($expected_value) && \is_numeric($actual_value)) {
-                        $msg = \sprintf($msg, $expected_value, $actual_value, $actual_value - $expected_value);
-                    } else {
-                        $msg = \sprintf($msg, $expected_value, $actual_value);
-                    }
-                }
-
-                // collect messages
-                if (null !== self::getBlockPrintSize() && 0 === $i % self::getBlockPrintSize()) {
-                    $msg .= PHP_EOL;
-                }
-                $this->failures[] = $msg;
+                    break;
             }
+        } catch (ExpectationFailedException $e) {
+            ++self::$counter;
+
+            $msg = $test->getMessage();
+
+            if (false !== \strpos($msg, '%')) {
+                $expected_value = $test->getExpected()->getValue();
+                $actual_value = $test->getActual()->getValue();
+
+                // handle custom %1$$ pattern for number_format()
+                $msg = (string) \preg_replace_callback('/(\%[1-3]\$\$)/', static function ($match) use ($expected_value, $actual_value): string {
+                    if (\is_numeric($expected_value) && '%1$$' === $match[1]) {
+                        return \number_format($expected_value, self::getNumberFormatDecimals(), ',', '.');
+                    }
+
+                    if (\is_numeric($actual_value) && '%2$$' === $match[1]) {
+                        return \number_format($actual_value, self::getNumberFormatDecimals(), ',', '.');
+                    }
+
+                    if (\is_numeric($expected_value) && \is_numeric($actual_value) && '%3$$' === $match[1]) {
+                        return \number_format($actual_value - $expected_value, self::getNumberFormatDecimals(), ',', '.');
+                    }
+
+                    return $match[1];
+                }, $msg);
+
+                // handle all other patterns
+                if (\is_numeric($expected_value) && \is_numeric($actual_value)) {
+                    $msg = \sprintf($msg, $expected_value, $actual_value, $actual_value - $expected_value);
+                } else {
+                    $msg = \sprintf($msg, $expected_value, $actual_value);
+                }
+            }
+
+            // collect messages
+            if (null !== self::getBlockPrintSize() && 0 === self::$counter % self::getBlockPrintSize()) {
+                $msg .= PHP_EOL;
+            }
+            $this->failures[] = $msg;
         }
     }
 }

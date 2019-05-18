@@ -5,8 +5,7 @@ declare(strict_types=1);
 namespace Xodej\Olest;
 
 /**
- * Class CubeNumParam
- * @package Xodej\Olest
+ * Class CubeNumParam.
  */
 class CubeNumParam extends AbstractCubeParam
 {
@@ -49,7 +48,6 @@ class CubeNumParam extends AbstractCubeParam
         $return = $this->getCube()->getValueC($this->coordinates);
         if (\is_numeric($return)) {
             return $return + $subTotal + $addTotal;
-
         }
 
         if ('#NA' === $return || null === $return) {
@@ -63,13 +61,11 @@ class CubeNumParam extends AbstractCubeParam
      * @param TestParamInterface $param
      *
      * @return CubeNumParam
-     *@throws \Exception
-     *
      */
     public function add(TestParamInterface $param): self
     {
         if ('string' === $param->getType()) {
-            throw new \Exception('text can not be used with TestParamCubeNum::add()');
+            throw new \InvalidArgumentException('text can not be used with TestParamCubeNum::add()');
         }
 
         $this->_add[] = $param;
@@ -81,13 +77,11 @@ class CubeNumParam extends AbstractCubeParam
      * @param TestParamInterface $param
      *
      * @return CubeNumParam
-     *@throws \Exception
-     *
      */
     public function subtract(TestParamInterface $param): self
     {
         if ('string' === $param->getType()) {
-            throw new \Exception('text can not be used with TestParamCubeNum::subtract()');
+            throw new \InvalidArgumentException('text can not be used with TestParamCubeNum::subtract()');
         }
 
         $this->_sub[] = $param;
@@ -96,7 +90,7 @@ class CubeNumParam extends AbstractCubeParam
     }
 
     /**
-     * @return array
+     * @return TestParamInterface[]
      */
     public function getAdd(): array
     {
@@ -104,7 +98,7 @@ class CubeNumParam extends AbstractCubeParam
     }
 
     /**
-     * @return array
+     * @return TestParamInterface[]
      */
     public function getSubtract(): array
     {

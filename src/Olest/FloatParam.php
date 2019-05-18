@@ -5,8 +5,7 @@ declare(strict_types=1);
 namespace Xodej\Olest;
 
 /**
- * Class FloatParam
- * @package Xodej\Olest
+ * Class FloatParam.
  */
 class FloatParam implements TestParamInterface
 {

@@ -14,7 +14,7 @@
   ],
   "require": {
     "php": ">=7.3.0",
-    "xodej/php-olapi": "dev-master"
+    "xodej/php-olapi": "@dev"
   },
   "suggest": {
   },
@@ -26,5 +26,6 @@
   },
   "require-dev": {
     "phpunit/phpunit": "8"
-  }
+  },
+  "minimum-stability": "dev"
 }

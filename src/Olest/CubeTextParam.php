@@ -5,8 +5,7 @@ declare(strict_types=1);
 namespace Xodej\Olest;
 
 /**
- * Class CubeTextParam
- * @package Xodej\Olest
+ * Class CubeTextParam.
  */
 class CubeTextParam extends AbstractCubeParam
 {

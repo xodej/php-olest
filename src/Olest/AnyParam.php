@@ -5,8 +5,7 @@ declare(strict_types=1);
 namespace Xodej\Olest;
 
 /**
- * Class AnyParam
- * @package Xodej\Olest
+ * Class AnyParam.
  */
 class AnyParam implements TestParamInterface
 {

@@ -7,8 +7,7 @@ namespace Xodej\Olest;
 use Xodej\Olapi\Cube;
 
 /**
- * Class AbstractCubeParam
- * @package Xodej\Olest
+ * Class AbstractCubeParam.
  */
 abstract class AbstractCubeParam implements TestParamInterface
 {
