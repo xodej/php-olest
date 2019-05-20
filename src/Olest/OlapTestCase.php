@@ -404,7 +404,7 @@ abstract class OlapTestCase extends TestCase
                 $actual_value = $test->getActual()->getValue();
 
                 // handle custom %1$$ pattern for number_format()
-                $msg = (string) \preg_replace_callback('/(\%[1-3]\$\$)/', static function ($match) use ($expected_value, $actual_value): string {
+                $msg = (string) \preg_replace_callback('/(\%[1-5]\$\$)/', static function ($match) use ($expected_value, $actual_value, $test): string {
                     if (\is_numeric($expected_value) && '%1$$' === $match[1]) {
                         return \number_format($expected_value, self::getNumberFormatDecimals(), ',', '.');
                     }
@@ -415,6 +415,14 @@ abstract class OlapTestCase extends TestCase
 
                     if (\is_numeric($expected_value) && \is_numeric($actual_value) && '%3$$' === $match[1]) {
                         return \number_format($actual_value - $expected_value, self::getNumberFormatDecimals(), ',', '.');
+                    }
+
+                    if ('%4$$' === $match[1] && $test->getExpected() instanceof AbstractCubeParam) {
+                        return \is_array($test->getExpected()->getCoordinates()) ? \implode(' / ', $test->getExpected()->getCoordinates()) : '';
+                    }
+
+                    if ('%5$$' === $match[1] && $test->getActual() instanceof AbstractCubeParam) {
+                        return \is_array($test->getActual()->getCoordinates()) ? \implode(' / ', $test->getActual()->getCoordinates()) : '';
                     }
 
                     return $match[1];
