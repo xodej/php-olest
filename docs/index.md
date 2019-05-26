@@ -3,6 +3,7 @@
 ## Installation
 
 ```cli
+composer require xodej/php-olapi:dev-master
 composer require xodej/php-olest:dev-master
 ```
 
@@ -10,6 +11,7 @@ If you already use PHPUnit you can install the package without the phpunit
 source and binary.
 
 ```cli
+composer require --no-dev xodej/php-olapi:dev-master
 composer require --no-dev xodej/php-olest:dev-master
 ```
 

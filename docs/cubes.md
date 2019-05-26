@@ -54,7 +54,9 @@ A build-in functionality allows you to choose between pre-defined templates.
 
 `%1$$` - expected value in 1,000.00 notation  
 `%2$$` - actual value in 1,000.00 notation  
-`%3$$` - difference between actual and expected value in 1,000.00 notation
+`%3$$` - difference between actual and expected value in 1,000.00 notation  
+`%4$$` - cube coordinates of expected (only usable with cube calls)  
+`%5$$` - cube coordinates of actual (only usable with cube calls)  
 
 The precision of the notation can be changed with `self::$numberFormatDecimals` which is `2` by default.
 
@@ -74,9 +76,7 @@ $coordinate = ['2019', 'Jan', 'Controlling'];
 $this->assertOlapAlmostEquals(
     100,
     new CubeNumParam($cube, $coordinate),
-    sprintf('Found %2$$ instead of expected %1$$ employees for coordinate %s. Delta of %3$$.',
-        implode(' / ', $coordinate)
-    ),
+    'Found %2$$ instead of expected %1$$ employees for coordinate %s. Delta of %3$$. %4$$ vs. %5$$',
     0.001
 );
 ```
@@ -101,9 +101,7 @@ $coordinate_HR = ['2019', '01', 'FI-CO', 'Employees'];
 $this->assertOlapAlmostEquals(
     new CubeNumParam($cube_HR, $coordinate_HR),
     new CubeNumParam($cube_FI, $coordinate_FI),
-    sprintf('Found %2$$ employees in FI instead of expected %1$$ in HR for coordinate %s. Delta of %3$$.',
-        implode(' / ', $coordinate_FI)
-    ),
+    'Found %2$$ employees in FI instead of expected %1$$ in HR for coordinate %s. Delta of %3$$. %4$$ vs. %5$$',
     0.001
 );
 ```
@@ -128,27 +126,25 @@ $cube_logistics = $connection->getCube('Logistic/Orders');
 $cube_bi_team   = $connection->getCube('BI/Orders');
 
 // fetch orders from the marketing department "orders placed"
-$cube_marketing = ['2019', 'Jan', 'DE', 'Orders'];
+$coord_marketing = ['2019', 'Jan', 'DE', 'Orders'];
 
 // fetch orders from the logistics department "orders shipped"
-$cube_logistics = ['2019', '01', 'D', 'Shipped Orders'];
+$coord_logistics = ['2019', '01', 'D', 'Shipped Orders'];
 
 // fetch orders from the business intelligence department "orders not shipped"
-$cube_bi_team   = ['2019-01', 'GERMANY', 'Orders Not Shipped'];
+$coord_bi_team   = ['2019-01', 'GERMANY', 'Orders Not Shipped'];
 
 // model: [orders shipped] = [orders placed] - [orders not shipped]
 $this->assertOlapAlmostEquals(
-    new CubeNumParam($cube_logistics, $coordinate_LO),
-    (new CubeNumParam($cube_marketing, $coordinate_MA))
-        ->subtract(new CubeNumParam($cube_bi_team, $coordinate_BI)),
-    sprintf('Found %2$$ shipped orders in logistic instead of expected %1$$ in marketing and business intelligence for coordinate %s. Delta of %3$$.',
-        implode(' / ', $coordinate_MA)
-    ),
+    new CubeNumParam($cube_logistics, $coord_logistics),
+    (new CubeNumParam($cube_marketing, $coord_marketing))
+        ->subtract(new CubeNumParam($cube_bi_team, $coord_bi_team)),
+    'Calculated %2$$ shipped orders instead of expected %1$$ in logistics for coordinate %4$$. Delta of %3$$.',
     0.001
 );
 ```
 
-## Recycle connections
+## Tip I - Recycle connections
 
 Since php-olest is a bit different from the purpose of PHPUnit it is recommended to recycle the OLAP connections. This will lead to less HTTP requests since OLAP meta data like IDs, dimensions etc. does not need to be reloaded. Setting up new connections for every test can also lead to a shortage of licenses.
 
@@ -169,7 +165,7 @@ $this->assertOlapAlmostEquals(
 );
 ```
 
-## Do not use values from the OLAP in your test
+## Tip II - Do not use values from the OLAP in your test
 
 While technically possible it will slow down your test suite significantly. Internally php-olest bundles all assert related OLAP requests into a single HTTP request where possible.
 
@@ -201,10 +197,6 @@ $this->assertOlapAlmostEquals(
 <?php
 // file: ./tests/Taxes2016BestBikeSellerTest.php
 declare(strict_types=1);
-
-namespace Xodej\Olest\Test;
-
-include_once __DIR__.'/../vendor/autoload.php';
 
 use Xodej\Olest\ConnectionSingleton;
 use Xodej\Olest\OlapTestCase;
