@@ -1,17 +1,20 @@
 # php-olest
 
-## a pure PHP lib for continuous testing of a Jedox OLAP with phpunit
+## a pure PHP lib for (continuous) testing of a Jedox OLAP
 
 This repository is **unstable**. Please be careful when updating your app.
 Some APIs/methods might break or change. If you use the library for
 professional work you should either fork the version you develop with or
 refer to a specific commit.
 
+Based on [phpunit](https://phpunit.de/).
+
 ## Installation
 
 Requires PHP 7.3+
 
 ```cli
+composer require xodej/php-olapi:dev-master
 composer require xodej/php-olest:dev-master
 ```
 
@@ -26,24 +29,21 @@ composer require xodej/php-olest:dev-master
 <?php
 // file ./tests/AdminTest.php
 declare(strict_types=1);
-namespace Xodej\Olest\Test;
-
-include_once __DIR__ . '/../vendor/autoload.php';
 
 use Xodej\Olest\OlapTestCase;
 use Xodej\Olest\CubeNumParam;
-use Xodej\Olapi\Connection;
+use Xodej\Olest\ConnectionSingleton;
 
 class AdminTest extends OlapTestCase
 {
     // define test
     public function testAdminIsAdmin(): void
     {
-        // create a connection to the Jedox OLAP
-        $connection = new Connection('http://127.0.0.1:7777', 'admin', 'admin');
+        // establish connection with Jedox OLAP
+        $connection = ConnectionSingleton::getConnection('prod', 'http://127.0.0.1:7777', 'admin', 'admin');
         $cube = $connection->getCube('System/#_USER_GROUP');
 
-        // test that admin user is assigned to admin group
+        // assert that user "admin" is assigned to user group "admin" 
         $this->assertOlapEquals(
             1,
             new CubeNumParam($cube, ['admin', 'admin']),

@@ -197,7 +197,7 @@ abstract class OlapTestCase extends TestCase
             if ($testScenario->getExpected() instanceof AbstractCubeParam) {
                 /** @var Cube $cube */
                 $cube = $testScenario->getExpected()->getCube();
-                $cubes[$cube->getOlapObjectId()] = $cube;
+                $cubes[\spl_object_hash($cube)] = $cube;
 
                 $cube->startCache(true);
 
@@ -209,7 +209,7 @@ abstract class OlapTestCase extends TestCase
                     foreach ($testScenario->getExpected()->getAdd() as $nestedParamObj) {
                         /** @var Cube $addCube */
                         $addCube = $nestedParamObj->getCube();
-                        $cubes[$addCube->getOlapObjectId()] = $addCube;
+                        $cubes[\spl_object_hash($addCube)] = $addCube;
 
                         $addCube->startCache(true);
                         $addCube->getValueC($nestedParamObj->getCoordinates());
@@ -219,7 +219,7 @@ abstract class OlapTestCase extends TestCase
                     foreach ($testScenario->getExpected()->getSubtract() as $nestedParamObj) {
                         /** @var Cube $subCube */
                         $subCube = $nestedParamObj->getCube();
-                        $cubes[$subCube->getOlapObjectId()] = $subCube;
+                        $cubes[\spl_object_hash($subCube)] = $subCube;
 
                         $subCube->startCache(true);
                         $subCube->getValueC($nestedParamObj->getCoordinates());
@@ -231,7 +231,7 @@ abstract class OlapTestCase extends TestCase
             if ($testScenario->getActual() instanceof AbstractCubeParam) {
                 /** @var Cube $cube */
                 $cube = $testScenario->getActual()->getCube();
-                $cubes[$cube->getOlapObjectId()] = $cube;
+                $cubes[\spl_object_hash($cube)] = $cube;
 
                 $cube->startCache(true);
 
@@ -243,7 +243,7 @@ abstract class OlapTestCase extends TestCase
                     foreach ($testScenario->getActual()->getAdd() as $nestedParamObj) {
                         /** @var Cube $addCube */
                         $addCube = $nestedParamObj->getCube();
-                        $cubes[$addCube->getOlapObjectId()] = $addCube;
+                        $cubes[\spl_object_hash($addCube)] = $addCube;
 
                         $addCube->startCache(true);
                         $addCube->getValueC($nestedParamObj->getCoordinates());
@@ -253,7 +253,7 @@ abstract class OlapTestCase extends TestCase
                     foreach ($testScenario->getActual()->getSubtract() as $nestedParamObj) {
                         /** @var Cube $subCube */
                         $subCube = $nestedParamObj->getCube();
-                        $cubes[$subCube->getOlapObjectId()] = $subCube;
+                        $cubes[\spl_object_hash($subCube)] = $subCube;
 
                         $subCube->startCache(true);
                         $subCube->getValueC($nestedParamObj->getCoordinates());

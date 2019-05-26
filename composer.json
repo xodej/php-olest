@@ -1,7 +1,7 @@
 {
   "name": "xodej/php-olest",
   "description": "Jedox OLAP data integrity tests",
-  "keywords": ["jedox", "olap", "test", "php"],
+  "keywords": ["jedox", "olap", "test", "php", "olest"],
   "homepage": "http://github.com/xodej/php-olest",
   "type": "library",
   "license": "MIT",
