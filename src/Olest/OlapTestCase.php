@@ -207,22 +207,26 @@ abstract class OlapTestCase extends TestCase
                 if ($testScenario->getExpected() instanceof CubeNumParam) {
                     // crawl through adds of expected
                     foreach ($testScenario->getExpected()->getAdd() as $nestedParamObj) {
-                        /** @var Cube $addCube */
-                        $addCube = $nestedParamObj->getCube();
-                        $cubes[\spl_object_hash($addCube)] = $addCube;
+                        if ($nestedParamObj instanceof CubeNumParam) {
+                            /** @var Cube $addCube */
+                            $addCube = $nestedParamObj->getCube();
+                            $cubes[\spl_object_hash($addCube)] = $addCube;
 
-                        $addCube->startCache(true);
-                        $addCube->getValueC($nestedParamObj->getCoordinates());
+                            $addCube->startCache(true);
+                            $addCube->getValueC($nestedParamObj->getCoordinates());
+                        }
                     }
 
                     // crawl through subtracts of expected
                     foreach ($testScenario->getExpected()->getSubtract() as $nestedParamObj) {
-                        /** @var Cube $subCube */
-                        $subCube = $nestedParamObj->getCube();
-                        $cubes[\spl_object_hash($subCube)] = $subCube;
+                        if ($nestedParamObj instanceof CubeNumParam) {
+                            /** @var Cube $subCube */
+                            $subCube = $nestedParamObj->getCube();
+                            $cubes[\spl_object_hash($subCube)] = $subCube;
 
-                        $subCube->startCache(true);
-                        $subCube->getValueC($nestedParamObj->getCoordinates());
+                            $subCube->startCache(true);
+                            $subCube->getValueC($nestedParamObj->getCoordinates());
+                        }
                     }
                 } // instanceof CubeNumParam
             } // expected
@@ -241,22 +245,26 @@ abstract class OlapTestCase extends TestCase
                 if ($testScenario->getActual() instanceof CubeNumParam) {
                     // crawl through adds of actual
                     foreach ($testScenario->getActual()->getAdd() as $nestedParamObj) {
-                        /** @var Cube $addCube */
-                        $addCube = $nestedParamObj->getCube();
-                        $cubes[\spl_object_hash($addCube)] = $addCube;
+                        if ($nestedParamObj instanceof CubeNumParam) {
+                            /** @var Cube $addCube */
+                            $addCube = $nestedParamObj->getCube();
+                            $cubes[\spl_object_hash($addCube)] = $addCube;
 
-                        $addCube->startCache(true);
-                        $addCube->getValueC($nestedParamObj->getCoordinates());
+                            $addCube->startCache(true);
+                            $addCube->getValueC($nestedParamObj->getCoordinates());
+                        }
                     }
 
                     // crawl through subtracts of actual
                     foreach ($testScenario->getActual()->getSubtract() as $nestedParamObj) {
-                        /** @var Cube $subCube */
-                        $subCube = $nestedParamObj->getCube();
-                        $cubes[\spl_object_hash($subCube)] = $subCube;
+                        if ($nestedParamObj instanceof CubeNumParam) {
+                            /** @var Cube $subCube */
+                            $subCube = $nestedParamObj->getCube();
+                            $cubes[\spl_object_hash($subCube)] = $subCube;
 
-                        $subCube->startCache(true);
-                        $subCube->getValueC($nestedParamObj->getCoordinates());
+                            $subCube->startCache(true);
+                            $subCube->getValueC($nestedParamObj->getCoordinates());
+                        }
                     }
                 } // instanceof CubeNumParam
             } // actual
