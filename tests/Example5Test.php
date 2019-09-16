@@ -25,7 +25,7 @@ class Example5Test extends OlapTestCase
      */
     public function testExampleNumber(): void
     {
-        $connection = ConnectionSingleton::getConnection('test_conn', 'http://192.168.33.20:7777', 'admin', 'admin');
+        $connection = ConnectionSingleton::getConnection('test_conn', 'http://127.0.0.1:7777', 'admin', 'admin');
         $cube = $connection->getCube('Biker/P_L');
 
         self::$numberFormatDecimals = 3;
