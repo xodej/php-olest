@@ -84,9 +84,9 @@ class TestScenario
     }
 
     /**
-     * @return TestParamInterface
+     * @return TestParamInterface|null
      */
-    public function getExpected(): TestParamInterface
+    public function getExpected(): ?TestParamInterface
     {
         return $this->expected;
     }
