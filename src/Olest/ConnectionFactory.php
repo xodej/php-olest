@@ -7,12 +7,12 @@ namespace Xodej\Olest;
 use Xodej\Olapi\Connection;
 
 /**
- * Class ConnectionSingleton.
+ * Class ConnectionFactory.
  */
-class ConnectionSingleton
+class ConnectionFactory
 {
     /** @var Connection[] */
-    protected static $connections = [];
+    private static array $connections = [];
 
     /**
      * @param string $connection_id
@@ -47,17 +47,29 @@ class ConnectionSingleton
 
     /**
      * @param string $connection_id
-     *
      * @return bool
+     * @throws \Exception
      */
     public static function delete(string $connection_id): bool
     {
         if (isset(self::$connections[$connection_id])) {
+            self::$connections[$connection_id]->close();
             unset(self::$connections[$connection_id]);
 
             return true;
         }
 
         return false;
+    }
+
+    /**
+     * @throws \Exception
+     */
+    public function __destruct()
+    {
+        foreach (self::$connections as $connection) {
+            $connection->close();
+        }
+        self::$connections = [];
     }
 }

@@ -25,6 +25,7 @@ composer require xodej/php-olest:dev-master
 ```
 
 ## Example
+
 ```php
 <?php
 // file ./tests/AdminTest.php
@@ -32,7 +33,7 @@ declare(strict_types=1);
 
 use Xodej\Olest\OlapTestCase;
 use Xodej\Olest\CubeNumParam;
-use Xodej\Olest\ConnectionSingleton;
+use Xodej\Olest\ConnectionFactory;
 
 class AdminTest extends OlapTestCase
 {
@@ -40,7 +41,7 @@ class AdminTest extends OlapTestCase
     public function testAdminIsAdmin(): void
     {
         // establish connection with Jedox OLAP
-        $connection = ConnectionSingleton::getConnection('prod', 'http://127.0.0.1:7777', 'admin', 'admin');
+        $connection = ConnectionFactory::getConnection('prod', 'http://localhost:7777', 'admin', 'admin');
         $cube = $connection->getCube('System/#_USER_GROUP');
 
         // assert that user "admin" is assigned to user group "admin" 

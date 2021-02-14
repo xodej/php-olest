@@ -8,7 +8,7 @@ Now we can write a test to assure that the system returns the correct amount of 
 
 ```php
 // create a connection to Jedox OLAP
-$connection = new Connection('http://127.0.0.1:7777', 'admin', 'admin');
+$connection = new Connection('http://localhost:7777', 'admin', 'admin');
 
 // retrieve the relevant cube
 $cube = $connection->getCube('Company/Employees');
@@ -31,7 +31,7 @@ To assure that your data is at least almost equal you can use the method `OlapTe
 
 ```php
 // create a connection to Jedox
-$connection = new Connection('http://127.0.0.1:7777', 'admin', 'admin');
+$connection = new Connection('http://localhost:7777', 'admin', 'admin');
 
 // retrieve the relevant cube
 $cube = $connection->getCube('Company/Employees');
@@ -62,7 +62,7 @@ The precision of the notation can be changed with `self::$numberFormatDecimals` 
 
 ```php
 // create a connection to Jedox
-$connection = new Connection('http://127.0.0.1:7777', 'admin', 'admin');
+$connection = new Connection('http://localhost:7777', 'admin', 'admin');
 
 // retrieve the relevant cube
 $cube = $connection->getCube('Company/Employees');
@@ -89,7 +89,7 @@ This becomes useful when e.g. HR department uses a different cube layout than th
 
 ```php
 // create a connection to Jedox
-$connection = new Connection('http://127.0.0.1:7777', 'admin', 'admin');
+$connection = new Connection('http://localhost:7777', 'admin', 'admin');
 
 // retrieve the relevant cube
 $cube_FI = $connection->getCube('Company/Employees');
@@ -118,7 +118,7 @@ With the methods `CubeNumParam::add()` and/or `CubeNumParam::subtract()` one is 
 
 ```php
 // create a connection to Jedox
-$connection = new Connection('http://127.0.0.1:7777', 'admin', 'admin');
+$connection = new Connection('http://localhost:7777', 'admin', 'admin');
 
 // retrieve the relevant cubes
 $cube_marketing = $connection->getCube('Marketing/Orders');
@@ -148,11 +148,11 @@ $this->assertOlapAlmostEquals(
 
 Since php-olest is a bit different from the purpose of PHPUnit it is recommended to recycle the OLAP connections. This will lead to less HTTP requests since OLAP meta data like IDs, dimensions etc. does not need to be reloaded. Setting up new connections for every test can also lead to a shortage of licenses.
 
-Therefore a `ConnectionSingleton` class is part of the library which holds a static connection throughout the entire test.
+Therefore a `ConnectionFactory` class is part of the library which holds a static connection throughout the entire test.
 
 ```php
 // create a connection to Jedox
-$connection = ConnectionSingleton::getConnection('prod', 'http://127.0.0.1:7777', 'admin', 'admin');
+$connection = ConnectionFactory::getConnection('prod', 'http://localhost:7777', 'admin', 'admin');
 
 // retrieve the relevant cube
 $cube = $connection->getCube('Company/Employees');
@@ -175,8 +175,8 @@ This approach allows you to run asserts against 100.000 cells in a single test w
 // **************************
 // ***** SLOW TEST DEMO *****
 
-// use ConnectionSingleton::getConnection() instead
-$connection = new Connection('http://127.0.0.1:7777', 'admin', 'admin');
+// use ConnectionFactory::getConnection() instead
+$connection = new Connection('http://localhost:7777', 'admin', 'admin');
 
 // retrieve the relevant cube
 $cube = $connection->getCube('Company/Employees');
@@ -198,7 +198,7 @@ $this->assertOlapAlmostEquals(
 // file: ./tests/Taxes2016BestBikeSellerTest.php
 declare(strict_types=1);
 
-use Xodej\Olest\ConnectionSingleton;
+use Xodej\Olest\ConnectionFactory;
 use Xodej\Olest\OlapTestCase;
 use Xodej\Olest\CubeNumParam;
 
@@ -206,7 +206,7 @@ class Taxes2016BestBikeSellerTest extends OlapTestCase
 {
     public function testTaxes2016BestBikeSeller(): void
     {
-        $connection = ConnectionSingleton::getConnection('test_conn', 'http://127.0.0.1:7777', 'admin', 'admin');
+        $connection = ConnectionFactory::getConnection('test_conn', 'http://localhost:7777', 'admin', 'admin');
         $cube = $connection->getCube('Biker/P_L');
 
         // all taxes on income in 2016 per month
