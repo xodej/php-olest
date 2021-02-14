@@ -6,7 +6,7 @@ namespace Xodej\Olest\Test;
 
 include_once __DIR__.'/../vendor/autoload.php';
 
-use Xodej\Olest\ConnectionSingleton;
+use Xodej\Olest\ConnectionFactory;
 use Xodej\Olest\OlapTestCase;
 use Xodej\Olest\CubeNumParam;
 
@@ -14,7 +14,7 @@ class Taxes2016BestBikeSellerTest extends OlapTestCase
 {
     public function testTaxes2016BestBikeSeller(): void
     {
-        $connection = ConnectionSingleton::getConnection('test_conn', 'http://127.0.0.1:7777', 'admin', 'admin');
+        $connection = ConnectionFactory::getConnection('test_conn', 'http://localhost:7777', 'admin', 'admin');
         $cube = $connection->getCube('Biker/P_L');
 
         // all taxes on income in 2016 per month

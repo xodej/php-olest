@@ -6,7 +6,7 @@ namespace Xodej\Olest\Test;
 
 include_once __DIR__.'/../vendor/autoload.php';
 
-use Xodej\Olest\ConnectionSingleton;
+use Xodej\Olest\ConnectionFactory;
 use Xodej\Olest\OlapTestCase;
 use Xodej\Olest\CubeNumParam;
 
@@ -24,7 +24,7 @@ class Example2Test extends OlapTestCase
      */
     public function testExampleAdmin2(): void
     {
-        $connection = ConnectionSingleton::getConnection('test_conn', 'http://127.0.0.1:7777', 'admin', 'admin');
+        $connection = ConnectionFactory::getConnection('test_conn', 'http://localhost:7777', 'admin', 'admin');
         $cube = $connection->getCube('System/#_USER_GROUP');
 
         $this->assertOlapEquals(
@@ -40,7 +40,7 @@ class Example2Test extends OlapTestCase
      */
     public function testAdminNotDesigner(): void
     {
-        $connection = ConnectionSingleton::getConnection('test_conn', 'http://127.0.0.1:7777', 'admin', 'admin');
+        $connection = ConnectionFactory::getConnection('test_conn', 'http://localhost:7777', 'admin', 'admin');
         $cube = $connection->getCube('System/#_USER_GROUP');
 
         $this->assertOlapNotEquals(

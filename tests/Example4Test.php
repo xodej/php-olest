@@ -6,7 +6,7 @@ namespace Xodej\Olest\Test;
 
 include_once __DIR__.'/../vendor/autoload.php';
 
-use Xodej\Olest\ConnectionSingleton;
+use Xodej\Olest\ConnectionFactory;
 use Xodej\Olest\OlapTestCase;
 use Xodej\Olest\CubeNumParam;
 
@@ -24,13 +24,13 @@ class Example4Test extends OlapTestCase
      */
     public function testExampleNumber4(): void
     {
-        $connection = ConnectionSingleton::getConnection('test_conn', 'http://127.0.0.1:7777', 'admin', 'admin');
+        $connection = ConnectionFactory::getConnection('test_conn', 'http://localhost:7777', 'admin', 'admin');
         $cube = $connection->getCube('Biker/P_L');
 
         self::$numberFormatDecimals = 5;
 
         $this->assertOlapEqualsWithDelta(
-            -28124787.77,
+            27976.61272,
             new CubeNumParam($cube, ['Actual', '2016', 'Jan', '10 Best Bike Seller AG', 'Taxes on income']),
             'delta is %3$$',
             0.001
