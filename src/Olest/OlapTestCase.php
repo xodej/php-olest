@@ -426,11 +426,11 @@ abstract class OlapTestCase extends TestCase
                     }
 
                     if ('%4$$' === $match[1] && $test->getExpected() instanceof AbstractCubeParam) {
-                        return \is_array($test->getExpected()->getCoordinates()) ? \implode(' / ', $test->getExpected()->getCoordinates()) : '';
+                        return \is_array($test->getExpected()->getCoordinates()) ? \str_replace('%', '%%', \implode(' / ', $test->getExpected()->getCoordinates())) : '';
                     }
 
                     if ('%5$$' === $match[1] && $test->getActual() instanceof AbstractCubeParam) {
-                        return \is_array($test->getActual()->getCoordinates()) ? \implode(' / ', $test->getActual()->getCoordinates()) : '';
+                        return \is_array($test->getActual()->getCoordinates()) ? \str_replace('%', '%%', \implode(' / ', $test->getActual()->getCoordinates())) : '';
                     }
 
                     return $match[1];
