@@ -12,4 +12,6 @@ interface TestParamInterface
     public function getValue();
 
     public function getType(): string;
+
+    public function getCoordinates(): array;
 }

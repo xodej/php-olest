@@ -37,4 +37,12 @@ class TextParam implements TestParamInterface
     {
         return 'string';
     }
+
+    /**
+     * @return string[]
+     */
+    public function getCoordinates(): array
+    {
+        return ['String<' . $this->value . '>'];
+    }
 }

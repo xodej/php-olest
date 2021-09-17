@@ -37,4 +37,12 @@ class AnyParam implements TestParamInterface
     {
         return gettype($this->getValue());
     }
+
+    /**
+     * @return string[]
+     */
+    public function getCoordinates(): array
+    {
+        return ['Any<' . $this->value . '>'];
+    }
 }

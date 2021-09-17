@@ -37,4 +37,12 @@ class BoolParam implements TestParamInterface
     {
         return 'boolean';
     }
+
+    /**
+     * @return string[]
+     */
+    public function getCoordinates(): array
+    {
+        return ['Bool<' . $this->value . '>'];
+    }
 }

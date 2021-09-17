@@ -37,4 +37,12 @@ class FloatParam implements TestParamInterface
     {
         return 'double';
     }
+
+    /**
+     * @return string[]
+     */
+    public function getCoordinates(): array
+    {
+        return ['Float<' . $this->value . '>'];
+    }
 }
