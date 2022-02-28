@@ -440,7 +440,7 @@ abstract class OlapTestCase extends TestCase
                 if (\is_numeric($expected_value) && \is_numeric($actual_value)) {
                     $msg = \sprintf($msg, $expected_value, $actual_value, $actual_value - $expected_value);
                 } else {
-                    $msg = \sprintf($msg, $expected_value, $actual_value);
+                    $msg = \sprintf($msg, \str_replace('%', '%%', $expected_value), \str_replace('%', '%%', $actual_value));
                 }
             }
 
